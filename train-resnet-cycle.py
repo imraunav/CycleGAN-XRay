@@ -10,7 +10,7 @@ from torch.utils.data.distributed import DistributedSampler
 from torch.distributed.optim import ZeroRedundancyOptimizer
 import numpy as np
 
-from models.unet import UNet
+from models.resnet import ResNet
 
 # from models.unet_sp import UNet_SP
 # from models.conv_discriminator import Discriminator
@@ -50,10 +50,10 @@ def main(rank, world_size):
     print(f"Running training on GPU {rank}")
     ddp_setup(rank, world_size)
 
-    g21 = UNet(n_channels=2, n_classes=1).to(rank)
+    g21 = ResNet(in_channels=2, out_channels=1).to(rank)
     g21 = DDP(g21, device_ids=[rank])
 
-    g12 = UNet(n_channels=1, n_classes=2).to(rank)
+    g12 = ResNet(n_channels=2, n_classes=1).to(rank)
     g12 = DDP(g12, device_ids=[rank])
 
     dataloader, datasampler = get_loader(world_size)
@@ -127,7 +127,7 @@ class Trainer:
         imgs = torch.concat([low_imgs, high_imgs], dim=-3)
         fused_imgs = self.g21(imgs).sigmoid()
         back_imgs = self.g12(fused_imgs).sigmoid()
-        
+
         loss = self.mse_loss(imgs, back_imgs)
         self.optimizer.zero_grad()
         loss.backward()
