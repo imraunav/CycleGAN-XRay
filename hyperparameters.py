@@ -4,7 +4,7 @@ sample_threshold = 0.1  # sample patches to have more than this standard deviati
 resize_min = 600
 crop_size = 512
 bit_depth = 16
-batch_size = 16
+batch_size = 8
 num_workers = 16  # set according to process on node
 
 max_epochs = 100
