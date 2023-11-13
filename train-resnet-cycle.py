@@ -53,7 +53,7 @@ def main(rank, world_size):
     g21 = ResNet(in_channels=2, out_channels=1).to(rank)
     g21 = DDP(g21, device_ids=[rank])
 
-    g12 = ResNet(n_channels=2, n_classes=1).to(rank)
+    g12 = ResNet(in_channels=1, out_channels=2).to(rank)
     g12 = DDP(g12, device_ids=[rank])
 
     dataloader, datasampler = get_loader(world_size)
