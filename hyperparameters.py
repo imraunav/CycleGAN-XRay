@@ -1,7 +1,7 @@
 dataset_path = "./CTP_Wires_Chargers_etc"
 sample_trial = 50  # keep low to avoid dataloading bottleneck
 sample_threshold = 0.1  # sample patches to have more than this standard deviation
-resize_min = 600
+resize_min = 256
 crop_size = 128
 bit_depth = 16
 batch_size = 8
