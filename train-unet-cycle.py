@@ -90,6 +90,18 @@ class Trainer:
             optimizer_class=optim.Adam,
             lr=hyperparameters.base_learning_rate,
         )
+        self.lrschedule = optim.lr_scheduler.ReduceLROnPlateau(
+            self.optimizer,
+            mode="min",
+            factor=0.1,
+            patience=5,
+            threshold=0.001,
+            threshold_mode="rel",
+            cooldown=0,
+            min_lr=0,
+            eps=1e-08,
+            verbose=True,
+        )
 
     def _save_checkpoint(
         self,
@@ -127,7 +139,7 @@ class Trainer:
         imgs = torch.concat([low_imgs, high_imgs], dim=-3)
         fused_imgs = self.g21(imgs).sigmoid()
         back_imgs = self.g12(fused_imgs).sigmoid()
-        
+
         loss = self.mse_loss(imgs, back_imgs)
         self.optimizer.zero_grad()
         loss.backward()
@@ -142,6 +154,7 @@ class Trainer:
 
         for epoch in range(max_epoch):
             epoch_loss = self._on_epoch(epoch)
+            self.lrschedule.step(epoch_loss)
             self.loss_writer(epoch, epoch_loss)
             if epoch % hyperparameters.ckpt_per == 0 and self.gpu_id == 0:
                 self._save_checkpoint(epoch, epoch_loss)
