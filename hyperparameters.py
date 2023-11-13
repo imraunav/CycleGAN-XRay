@@ -2,9 +2,9 @@ dataset_path = "./CTP_Wires_Chargers_etc"
 sample_trial = 50  # keep low to avoid dataloading bottleneck
 sample_threshold = 0.1  # sample patches to have more than this standard deviation
 resize_min = 600
-crop_size = 256
+crop_size = 128
 bit_depth = 16
-batch_size = 16
+batch_size = 8
 num_workers = 16  # set according to process on node
 
 max_epochs = 5000
