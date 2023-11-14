@@ -193,7 +193,8 @@ class Trainer:
         self.datasampler.set_epoch(epoch)
         d_losses, g_losses, cyc_losses = [], [], []
         for batch in self.dataloader:
-            d_loss, g_loss, cyc_loss = self._on_batch(batch)
+            with torch.autograd.set_detect_anomaly(True):
+                d_loss, g_loss, cyc_loss = self._on_batch(batch)
             d_losses.append(d_loss)
             g_losses.append(g_loss)
             cyc_losses.append(cyc_loss)
