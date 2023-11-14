@@ -132,7 +132,7 @@ class Trainer:
             self.disc_optimizer.zero_grad()
             # predictions
             real_pred = torch.sigmoid(self.d(real_batch))
-            fake_pred = torch.sigmoid(self.d(fake_batch.detach()))
+            # fake_pred = torch.sigmoid(self.d(fake_batch.detach()))
 
             # prep labels
             real_labels = torch.full(
@@ -142,17 +142,17 @@ class Trainer:
                 device=self.gpu_id,
                 requires_grad=False,
             )
-            fake_labels = torch.full(
-                fake_pred.shape,
-                0,
-                dtype=torch.float32,
-                device=self.gpu_id,
-                requires_grad=False,
-            )
+            # fake_labels = torch.full(
+            #     fake_pred.shape,
+            #     0,
+            #     dtype=torch.float32,
+            #     device=self.gpu_id,
+            #     requires_grad=False,
+            # )
 
             real_loss = self.adv_crit(real_pred, real_labels)
-            fake_loss = self.adv_crit(fake_pred, fake_labels)
-            loss = real_loss + fake_loss
+            # fake_loss = self.adv_crit(fake_pred, fake_labels)
+            loss = real_loss #+ fake_loss
             loss.backward()
             self.disc_optimizer.step()
         return loss.item()
