@@ -3,6 +3,7 @@ import pickle
 import torch
 import torch.distributed as dist
 import torch.nn as nn
+import torch.nn.functional as F
 import torch.optim as optim
 import torch.multiprocessing as mp
 from torch.nn.parallel import DistributedDataParallel as DDP
@@ -129,8 +130,8 @@ class Trainer:
     def update_discriminator(self, real_batch, fake_batch):
         self.disc_optimizer.zero_grad()
         # predictions
-        real_pred = self.d(real_batch).sigmoid()
-        fake_pred = self.d(fake_batch.detach()).sigmoid()
+        real_pred = torch.sigmoid(self.d(real_batch))
+        fake_pred = torch.sigmoid(self.d(fake_batch.detach()))
 
         # prep labels
         real_labels = torch.full(
@@ -172,8 +173,8 @@ class Trainer:
 
     def update_cyclic(self, imgs):
         self.cycle_optimizer.zero_grad()
-        fused = self.g21(imgs).sigmoid()
-        back = self.g12(fused).sigmoid()
+        fused = torch.sigmoid(self.g21(imgs))
+        back = torch.sigmoid(self.g12(fused))
 
         loss = self.cycle_crit(fused, back)
         loss.backward()
