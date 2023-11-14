@@ -9,6 +9,7 @@ from torch.utils.data import DataLoader
 from torch.utils.data.distributed import DistributedSampler
 from torch.distributed.optim import ZeroRedundancyOptimizer
 import numpy as np
+from matplotlib import pyplot as plt
 
 from models.resnet import ResNet
 
@@ -139,6 +140,19 @@ class Trainer:
         imgs = torch.concat([low_imgs, high_imgs], dim=-3)
         fused_imgs = self.g21(imgs).sigmoid()
         back_imgs = self.g12(fused_imgs).sigmoid()
+
+        plt.subplot(3,2,1)
+        plt.imshow(low_imgs[0, 1].numpy())
+        plt.subplot(3,2,2)
+        plt.imshow(high_imgs[0, 1].numpy())
+        plt.subplot(3,2,3)
+        plt.imshow(fused_imgs[0, 1].numpy())
+        plt.subplot(3,2,5)
+        plt.imshow(back_imgs[0, 1].numpy())
+        plt.subplot(3,2,6)
+        plt.imshow(back_imgs[0, 2].numpy())
+        plt.savefig("ResNet-sample.png")
+        
 
         loss = self.mse_loss(imgs, back_imgs)
         self.optimizer.zero_grad()
