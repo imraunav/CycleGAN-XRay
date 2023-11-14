@@ -132,6 +132,8 @@ class Trainer:
         real_pred = self.d(real_batch).sigmoid()
         fake_pred = self.d(fake_batch.detach()).sigmoid()
 
+        print("Pred_shapes: ", real_pred.shape, fake_pred.shape)
+
         # prep labels
         real_labels = torch.full(
             real_pred.shape,
