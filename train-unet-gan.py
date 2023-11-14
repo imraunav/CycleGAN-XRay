@@ -127,10 +127,10 @@ class Trainer:
         print(f"[GPU:{self.gpu_id}] - Epoch:{epoch} - Loss:{epoch_loss}")
 
     def update_discriminator(self, real_batch, fake_batch):
-        self.disc_optimizer.zero_grad()
+        self.d.zero_grad()
         # predictions
         real_pred = self.d(real_batch)
-        fake_pred = self.d(fake_batch)
+        fake_pred = self.d(fake_batch.detach())
 
         # prep labels
         real_labels = torch.full(
@@ -148,7 +148,7 @@ class Trainer:
         return loss.item()
 
     def update_generator(self, imgs, real_batch):
-        self.gen_optimizer.zero_grad()
+        self.g21.zero_grad()
         # generate
         fake_batch = self.g21(imgs)
 
@@ -161,7 +161,8 @@ class Trainer:
         return loss.item()
 
     def update_cyclic(self, imgs):
-        self.cycle_optimizer.zero_grad()
+        self.g21.zero_grad()
+        self.g12.zero_grad()
         fused = self.g21(imgs).sigmoid()
         back = self.g12(fused).sigmoid()
 
@@ -178,7 +179,7 @@ class Trainer:
 
         imgs = torch.concat([low_imgs, high_imgs], dim=-3)
         # update discriminator
-        fused_imgs = self.g21(imgs).detach()  # using BCElogits
+        fused_imgs = self.g21(imgs)  # using BCElogits
         if torch.randn(1).item() < 0.5:  # randomly choose which the real images are
             d_loss = self.update_discriminator(low_imgs, fused_imgs)
         else:
