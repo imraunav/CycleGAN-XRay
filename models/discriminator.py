@@ -49,7 +49,7 @@ class DoubleConv(nn.Module):
                 bias=False,
             )),
             nn.BatchNorm2d(mid_channels),
-            nn.LeakyReLU(inplace=True),
+            nn.LeakyReLU(),
             nn.utils.spectral_norm(nn.Conv2d(
                 mid_channels,
                 out_channels,
@@ -58,7 +58,7 @@ class DoubleConv(nn.Module):
                 bias=False,
             )),
             nn.BatchNorm2d(out_channels),
-            nn.LeakyReLU(inplace=True),
+            nn.LeakyReLU(),
         )
 
     def forward(self, x):
