@@ -127,17 +127,25 @@ class Trainer:
         print(f"[GPU:{self.gpu_id}] - Epoch:{epoch} - Loss:{epoch_loss}")
 
     def update_discriminator(self, real_batch, fake_batch):
-        self.d.zero_grad()
+        self.disc_optimizer.zero_grad()
         # predictions
         real_pred = self.d(real_batch)
         fake_pred = self.d(fake_batch.detach())
 
         # prep labels
         real_labels = torch.full(
-            real_pred.shape, 1, dtype=torch.float32, device=self.gpu_id
+            real_pred.shape,
+            1,
+            dtype=torch.float32,
+            device=self.gpu_id,
+            requires_grad=False,
         )
         fake_labels = torch.full(
-            fake_pred.shape, 0, dtype=torch.float32, device=self.gpu_id
+            fake_pred.shape,
+            0,
+            dtype=torch.float32,
+            device=self.gpu_id,
+            requires_grad=False,
         )
 
         loss = self.adv_crit(real_pred, real_labels) + self.adv_crit(
@@ -148,21 +156,22 @@ class Trainer:
         return loss.item()
 
     def update_generator(self, imgs, real_batch):
-        self.g21.zero_grad()
+        self.gen_optimizer.zero_grad()
         # generate
         fake_batch = self.g21(imgs)
 
         # classify
         pred = self.d(fake_batch)
-        target = torch.full(pred.shape, 1, dtype=torch.float32, device=self.gpu_id)
+        target = torch.full(
+            pred.shape, 1, dtype=torch.float32, device=self.gpu_id, requires_grad=False
+        )
         loss = self.adv_crit(pred, target)
         loss.backward()
         self.gen_optimizer.step()
         return loss.item()
 
     def update_cyclic(self, imgs):
-        self.g21.zero_grad()
-        self.g12.zero_grad()
+        self.cycle_optimizer.zero_grad()
         fused = self.g21(imgs).sigmoid()
         back = self.g12(fused).sigmoid()
 
