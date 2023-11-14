@@ -133,8 +133,8 @@ class Trainer:
         fake_pred = self.d(fake_batch)
 
         # prep labels
-        real_labels = torch.full(real_pred.shape, 1)
-        fake_labels = torch.full(fake_pred.shape, 0)
+        real_labels = torch.full(real_pred.shape, 1, device=self.gpu_id)
+        fake_labels = torch.full(fake_pred.shape, 0, device=self.gpu_id)
 
         loss = self.adv_crit(real_pred, real_labels) + self.adv_crit(
             fake_pred, fake_labels
@@ -150,7 +150,7 @@ class Trainer:
 
         # classify
         pred = self.d(fake_batch)
-        target = torch.full(pred.shape, 1)
+        target = torch.full(pred.shape, 1, device=self.gpu_id)
         loss = self.adv_crit(pred, target)
         loss.backward()
         self.gen_optimizer.step()
