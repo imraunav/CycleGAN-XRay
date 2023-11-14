@@ -133,8 +133,12 @@ class Trainer:
         fake_pred = self.d(fake_batch)
 
         # prep labels
-        real_labels = torch.full(real_pred.shape, 1, device=self.gpu_id)
-        fake_labels = torch.full(fake_pred.shape, 0, device=self.gpu_id)
+        real_labels = torch.full(
+            real_pred.shape, 1, dtype=torch.float32, device=self.gpu_id
+        )
+        fake_labels = torch.full(
+            fake_pred.shape, 0, dtype=torch.float32, device=self.gpu_id
+        )
 
         loss = self.adv_crit(real_pred, real_labels) + self.adv_crit(
             fake_pred, fake_labels
@@ -150,12 +154,12 @@ class Trainer:
 
         # classify
         pred = self.d(fake_batch)
-        target = torch.full(pred.shape, 1, device=self.gpu_id)
+        target = torch.full(pred.shape, 1, dtype=torch.float32, device=self.gpu_id)
         loss = self.adv_crit(pred, target)
         loss.backward()
         self.gen_optimizer.step()
         return loss.item()
-    
+
     def update_cyclic(self, imgs):
         self.cycle_optimizer.zero_grad()
         fused = self.g21(imgs).sigmoid()
@@ -167,7 +171,6 @@ class Trainer:
 
         return loss.item()
 
-
     def _on_batch(self, batch):
         low_imgs, high_imgs = batch
         low_imgs = low_imgs.to(self.gpu_id)
@@ -175,7 +178,7 @@ class Trainer:
 
         imgs = torch.concat([low_imgs, high_imgs], dim=-3)
         # update discriminator
-        fused_imgs = self.g21(imgs).detach() # using BCElogits 
+        fused_imgs = self.g21(imgs).detach()  # using BCElogits
         if torch.randn(1).item() < 0.5:  # randomly choose which the real images are
             d_loss = self.update_discriminator(low_imgs, fused_imgs)
         else:
@@ -213,23 +216,25 @@ class Trainer:
             g_losses.extend(epoch_g_losses)
             cyc_losses.extend(epoch_cyc_losses)
             if epoch < 50:
-                print(f"[GPU{self.gpu_id}] Epoch:{epoch} d_loss:{d_losses[-1]}, g_loss:{g_losses[-1]}, cyc_loss:{cyc_losses[-1]}")
+                print(
+                    f"[GPU{self.gpu_id}] Epoch:{epoch} d_loss:{d_losses[-1]}, g_loss:{g_losses[-1]}, cyc_loss:{cyc_losses[-1]}"
+                )
             if epoch % hyperparameters.ckpt_per == 0 and self.gpu_id == 0:
-                with open('d_loss.pkl', mode="wb") as file:
+                with open("d_loss.pkl", mode="wb") as file:
                     pickle.dump(d_losses, file, pickle.HIGHEST_PROTOCOL)
-                with open('g_loss.pkl', mode="wb") as file:
+                with open("g_loss.pkl", mode="wb") as file:
                     pickle.dump(g_losses, file, pickle.HIGHEST_PROTOCOL)
-                with open('cyc_loss.pkl', mode="wb") as file:
+                with open("cyc_loss.pkl", mode="wb") as file:
                     pickle.dump(cyc_losses, file, pickle.HIGHEST_PROTOCOL)
                 self._save_checkpoint(epoch)
 
         # Final epoch save
         if self.gpu_id == 0:
-            with open('d_loss.pkl', mode="wb") as file:
+            with open("d_loss.pkl", mode="wb") as file:
                 pickle.dump(d_losses, file, pickle.HIGHEST_PROTOCOL)
-            with open('g_loss.pkl', mode="wb") as file:
+            with open("g_loss.pkl", mode="wb") as file:
                 pickle.dump(g_losses, file, pickle.HIGHEST_PROTOCOL)
-            with open('cyc_loss.pkl', mode="wb") as file:
+            with open("cyc_loss.pkl", mode="wb") as file:
                 pickle.dump(cyc_losses, file, pickle.HIGHEST_PROTOCOL)
             self._save_checkpoint(max_epoch)
 
