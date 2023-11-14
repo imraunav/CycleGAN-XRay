@@ -128,38 +128,37 @@ class Trainer:
         print(f"[GPU:{self.gpu_id}] - Epoch:{epoch} - Loss:{epoch_loss}")
 
     def update_discriminator(self, real_batch, fake_batch):
-        with torch.autograd.set_detect_anomaly(True):
-            self.disc_optimizer.zero_grad()
-            # predictions
-            real_pred = torch.sigmoid(self.d(real_batch))
+        self.disc_optimizer.zero_grad()
+        # predictions
+        real_pred = torch.sigmoid(self.d(real_batch))
 
-            # prep labels
-            real_labels = torch.full(
-                real_pred.shape,
-                1,
-                dtype=torch.float32,
-                device=self.gpu_id,
-                requires_grad=False,
-            )
+        # prep labels
+        real_labels = torch.full(
+            real_pred.shape,
+            1,
+            dtype=torch.float32,
+            device=self.gpu_id,
+            requires_grad=False,
+        )
 
-            real_loss = self.adv_crit(real_pred, real_labels)
-            real_loss.backward()
-            self.disc_optimizer.step()
-            
-            self.disc_optimizer.zero_grad()
-            fake_pred = torch.sigmoid(self.d(fake_batch.detach()))
-            fake_labels = torch.full(
-                fake_pred.shape,
-                0,
-                dtype=torch.float32,
-                device=self.gpu_id,
-                requires_grad=False,
-            )
-            fake_loss = self.adv_crit(fake_pred, fake_labels)
-            fake_loss.backward()
-            self.disc_optimizer.step()
-            
-            loss = real_loss + fake_loss
+        real_loss = self.adv_crit(real_pred, real_labels)
+        real_loss.backward()
+        self.disc_optimizer.step()
+
+        self.disc_optimizer.zero_grad()
+        fake_pred = torch.sigmoid(self.d(fake_batch.detach()))
+        fake_labels = torch.full(
+            fake_pred.shape,
+            0,
+            dtype=torch.float32,
+            device=self.gpu_id,
+            requires_grad=False,
+        )
+        fake_loss = self.adv_crit(fake_pred, fake_labels)
+        fake_loss.backward()
+        self.disc_optimizer.step()
+
+        loss = real_loss + fake_loss
         return loss.item()
 
     def update_generator(self, imgs):
@@ -212,11 +211,12 @@ class Trainer:
     def _on_epoch(self, epoch):
         self.datasampler.set_epoch(epoch)
         d_losses, g_losses, cyc_losses = [], [], []
-        for batch in self.dataloader:
-            d_loss, g_loss, cyc_loss = self._on_batch(batch)
-            d_losses.append(d_loss)
-            g_losses.append(g_loss)
-            cyc_losses.append(cyc_loss)
+        with torch.autograd.set_detect_anomaly(True):
+            for batch in self.dataloader:
+                d_loss, g_loss, cyc_loss = self._on_batch(batch)
+                d_losses.append(d_loss)
+                g_losses.append(g_loss)
+                cyc_losses.append(cyc_loss)
 
         return d_losses, g_losses, cyc_losses
 
