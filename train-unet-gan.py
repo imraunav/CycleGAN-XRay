@@ -148,9 +148,9 @@ class Trainer:
             requires_grad=False,
         )
 
-        loss = self.adv_crit(real_pred, real_labels) + self.adv_crit(
-            fake_pred, fake_labels
-        )
+        real_loss = self.adv_crit(real_pred, real_labels)
+        fake_loss = self.adv_crit(fake_pred, fake_labels)
+        loss = real_loss + fake_loss
         loss.backward()
         self.disc_optimizer.step()
         return loss.item()
