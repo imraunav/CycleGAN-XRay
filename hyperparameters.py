@@ -8,6 +8,6 @@ batch_size = 8
 num_workers = 16  # set according to process on node
 
 max_epochs = 5000
-ckpt_per = 50
+ckpt_per = 100
 base_learning_rate = 1e-4
 max_iter = 20
