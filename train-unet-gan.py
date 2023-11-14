@@ -81,7 +81,7 @@ class Trainer:
         self.dataloader = dataloader
         self.datasampler = datasampler
 
-        self.adv_crit = nn.BCEWithLogitsLoss()
+        self.adv_crit = nn.BCELoss()
         self.cycle_crit = nn.L1Loss()
 
         self.cycle_optimizer = ZeroRedundancyOptimizer(
@@ -129,8 +129,8 @@ class Trainer:
     def update_discriminator(self, real_batch, fake_batch):
         self.disc_optimizer.zero_grad()
         # predictions
-        real_pred = self.d(real_batch)
-        fake_pred = self.d(fake_batch.detach())
+        real_pred = self.d(real_batch).sigmoid()
+        fake_pred = self.d(fake_batch.detach()).sigmoid()
 
         # prep labels
         real_labels = torch.full(
