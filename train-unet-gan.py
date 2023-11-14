@@ -59,7 +59,7 @@ def main(rank, world_size):
     g12.load_state_dict(torch.load(hyperparameters.pretrain_weights12))
     g12 = DDP(g12, device_ids=[rank])
 
-    d = UNet(1, 1).to(rank)
+    d = UNet_sn(1, 1).to(rank)
     d = DDP(d, device_ids=[rank])
 
     dataloader, datasampler = get_loader(world_size)
@@ -131,8 +131,6 @@ class Trainer:
         # predictions
         real_pred = self.d(real_batch).sigmoid()
         fake_pred = self.d(fake_batch.detach()).sigmoid()
-
-        print("Pred_shapes: ", real_pred.shape, fake_pred.shape)
 
         # prep labels
         real_labels = torch.full(
