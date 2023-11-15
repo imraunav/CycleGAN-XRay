@@ -187,7 +187,7 @@ class Trainer:
         fused = torch.sigmoid(self.g21(imgs))
         back = torch.sigmoid(self.g12(fused))
 
-        loss = self.cycle_crit(fused, back)
+        loss = self.cycle_crit(imgs, back)
         loss.backward()
         self.g21_optimizer.step()
         self.g12_optimizer.step()
