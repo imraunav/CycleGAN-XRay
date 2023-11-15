@@ -2,10 +2,10 @@
 
 #SBATCH -N 1 
 #SBATCH --ntasks-per-node=16 #number of cores per node
-#SBATCH --time=2-00:00:00 
+#SBATCH --time=5:00:00 
 #SBATCH --job-name=UNet-cyle  #change name of ur job
 #SBATCH --output=output.unetrgb  #change name of ur output file
-#SBATCH --partition=gpu  #there are various partition. U can change various GPUs
+#SBATCH --partition=stardard  #there are various partition. U can change various GPUs
 #SBATCH --gres=gpu:2 #same as above
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --mail-user=t22104@students.iitmandi.ac.in
