@@ -5,7 +5,7 @@
 #SBATCH --time=5:00:00 
 #SBATCH --job-name=UNet-cyle  #change name of ur job
 #SBATCH --output=output.unetrgb  #change name of ur output file
-#SBATCH --partition=stardard  #there are various partition. U can change various GPUs
+#SBATCH --partition=standard  #there are various partition. U can change various GPUs
 #SBATCH --gres=gpu:2 #same as above
 #SBATCH --mail-type=BEGIN,END,FAIL
 #SBATCH --mail-user=t22104@students.iitmandi.ac.in
