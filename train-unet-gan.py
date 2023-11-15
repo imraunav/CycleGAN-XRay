@@ -164,7 +164,7 @@ class Trainer:
     def update_generator(self, imgs):
         self.gen_optimizer.zero_grad()
         # generate
-        fake_batch = self.g21(imgs)
+        fake_batch = torch.sigmoid(self.g21(imgs))
 
         # classify
         pred = self.d(fake_batch)
