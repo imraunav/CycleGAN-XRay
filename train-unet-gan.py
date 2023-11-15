@@ -85,8 +85,8 @@ class Trainer:
         self.adv_crit = nn.BCELoss()
         self.cycle_crit = nn.L1Loss()
 
-        self.cycle_optimizer = ZeroRedundancyOptimizer(
-            list(self.g12.parameters()) + list(self.g21.parameters()),
+        self.g12_optimizer = ZeroRedundancyOptimizer(
+            self.g12.parameters(),
             optimizer_class=optim.Adam,
             lr=hyperparameters.base_learning_rate,
         )
@@ -97,7 +97,7 @@ class Trainer:
             lr=hyperparameters.base_learning_rate,
         )
 
-        self.gen_optimizer = ZeroRedundancyOptimizer(
+        self.g21_optimizer = ZeroRedundancyOptimizer(
             self.g21.parameters(),
             optimizer_class=optim.Adam,
             lr=hyperparameters.base_learning_rate,
@@ -162,7 +162,7 @@ class Trainer:
         return loss.item()
 
     def update_generator(self, imgs):
-        self.gen_optimizer.zero_grad()
+        self.g21_optimizer.zero_grad()
         # generate
         fake_batch = torch.sigmoid(self.g21(imgs))
 
@@ -173,17 +173,20 @@ class Trainer:
         )
         loss = self.adv_crit(pred, target)
         loss.backward()
-        self.gen_optimizer.step()
+        self.g21_optimizer.step()
         return loss.item()
 
     def update_cyclic(self, imgs):
-        self.cycle_optimizer.zero_grad()
+        self.g21_optimizer.zero_grad()
+        self.g12_optimizer.zero_grad()
+
         fused = torch.sigmoid(self.g21(imgs))
         back = torch.sigmoid(self.g12(fused))
 
         loss = self.cycle_crit(fused, back)
         loss.backward()
-        self.cycle_optimizer.step()
+        self.g21_optimizer.step()
+        self.g12_optimizer.step()
 
         return loss.item()
 
