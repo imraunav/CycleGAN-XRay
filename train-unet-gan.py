@@ -167,11 +167,15 @@ class Trainer:
         fake_batch = torch.sigmoid(self.g21(imgs))
 
         # classify
-        pred = self.d(fake_batch)
-        target = torch.full(
-            pred.shape, 1, dtype=torch.float32, device=self.gpu_id, requires_grad=False
+        fake_pred = torch.sigmoid(self.d(fake_batch))
+        fake_labels = torch.full(
+            fake_pred.shape,
+            0,
+            dtype=torch.float32,
+            device=self.gpu_id,
+            requires_grad=False,
         )
-        loss = self.adv_crit(pred, target)
+        loss = self.adv_crit(fake_pred, fake_labels)
         loss.backward()
         self.g21_optimizer.step()
         return loss.item()
