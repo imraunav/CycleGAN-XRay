@@ -115,11 +115,11 @@ class Trainer:
             os.mkdir("./weights")
 
         ckp = self.g23.module.state_dict()
-        model_path = f"./weights/g21unet_{epoch}_loss{loss:.4f}.pt"
+        model_path = f"./weights/g23unetrgb_{epoch}_loss{loss:.4f}.pt"
         torch.save(ckp, model_path)
 
         ckp = self.g32.module.state_dict()
-        model_path = f"./weights/g12unet_{epoch}_loss{loss:.4f}.pt"
+        model_path = f"./weights/g32unetrgb_{epoch}_loss{loss:.4f}.pt"
         torch.save(ckp, model_path)
 
     def _on_epoch(self, epoch: int):
