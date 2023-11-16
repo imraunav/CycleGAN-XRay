@@ -113,15 +113,15 @@ class Trainer:
             os.mkdir("./weights")
 
         ckp = self.g21.module.state_dict()
-        model_path = f"./weights/g21unetgan_{epoch}.pt"
+        model_path = f"./weights/g21unetgan-2_{epoch}.pt"
         torch.save(ckp, model_path)
 
         ckp = self.g12.module.state_dict()
-        model_path = f"./weights/g12unetgan_{epoch}.pt"
+        model_path = f"./weights/g12unetgan-2_{epoch}.pt"
         torch.save(ckp, model_path)
 
         ckp = self.d.module.state_dict()
-        model_path = f"./weights/dunetgan_{epoch}.pt"
+        model_path = f"./weights/dunetgan-2_{epoch}.pt"
         torch.save(ckp, model_path)
 
     def loss_writer(self, epoch, epoch_loss):
@@ -202,10 +202,13 @@ class Trainer:
         imgs = torch.concat([low_imgs, high_imgs], dim=-3)
         # update discriminator
         fused_imgs = torch.sigmoid(self.g21(imgs))
-        if torch.randn(1).item() < 0.5:  # randomly choose which the real images are
-            d_loss = self.update_discriminator(low_imgs, fused_imgs)
-        else:
-            d_loss = self.update_discriminator(high_imgs, fused_imgs)
+        # if torch.randn(1).item() < 0.5:  # randomly choose which the real images are
+        #     d_loss = self.update_discriminator(low_imgs, fused_imgs)
+        # else:
+        #     d_loss = self.update_discriminator(high_imgs, fused_imgs)
+        d_loss = 0.5*(self.update_discriminator(
+            low_imgs, fused_imgs
+        ) + self.update_discriminator(high_imgs, fused_imgs))
 
         # update generator
         g_loss = self.update_generator(imgs)

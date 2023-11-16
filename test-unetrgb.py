@@ -9,29 +9,24 @@ from models.unet import UNet
 from utils.util import read_im
 
 in_path = "./test/input"
-fused_path = "./test/fused-unet-2"
-back_path = "./test/back-unet-2"
+fused_path = "./test/fused-unet-rgb"
+back_path = "./test/back-unet-rgb"
 # fused_path = "./test/fused-unet-gan"
 # back_path = "./test/back-unet-gan"
-# weights12 = "./weights/g12unet_1000_loss0.0037.pt"
-# weights21 = "./weights/g21unet_1000_loss0.0037.pt"
-
-# weights12 = "./weights/g12unetgan_1000.pt"
-# weights21 = "./weights/g21unetgan_1000.pt"
-weights12 = "./weights/g12unetgan-2_500.pt"
-weights21 = "./weights/g21unetgan-2_500.pt"
+weights32 = "./weights/g32unetrgb_1000_loss0.0302.pt"
+weights23 = "./weights/g23unetrgb_1000_loss0.0302.pt"
 
 
 def main():
     device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
 
-    unet21 = UNet(2, 1).eval()
-    unet21.load_state_dict(torch.load(weights21, map_location=device))
-    print("UNet21 weights loaded successfully!")
+    unet23 = UNet(2, 3).eval()
+    unet23.load_state_dict(torch.load(weights23, map_location=device))
+    print("UNet23 weights loaded successfully!")
 
-    unet12 = UNet(1, 2).eval()
-    unet12.load_state_dict(torch.load(weights12, map_location=device))
-    print("UNet12 weights loaded successfully!")
+    unet32 = UNet(3, 2).eval()
+    unet32.load_state_dict(torch.load(weights32, map_location=device))
+    print("UNet32 weights loaded successfully!")
 
     high_paths = []
     low_paths = []
@@ -60,13 +55,13 @@ def main():
         print(in_img.shape)
         intensor = torch.tensor(in_img, dtype=torch.float32, device=device)
 
-        fusedtensor = unet21(intensor).sigmoid()
+        fusedtensor = unet23(intensor).sigmoid()
 
-        backtensor = unet12(fusedtensor).sigmoid()
+        backtensor = unet32(fusedtensor).sigmoid()
 
-        fused_im = fusedtensor.detach().to(torch.device("cpu")).numpy()[0, 0, :, :]
+        fused_im = fusedtensor.detach().numpy()[0, 0, :, :]
 
-        back_im = backtensor.detach().to(torch.device("cpu")).numpy()
+        back_im = backtensor.detach().numpy()
         low_back, high_back = back_im[0, 0, :, :], back_im[0, 1, :, :]
 
         save_fused(low, fused_im)
