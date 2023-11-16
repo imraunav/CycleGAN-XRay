@@ -53,11 +53,11 @@ def main(rank, world_size):
     ddp_setup(rank, world_size)
 
     g21 = UNet(n_channels=2, n_classes=1).to(rank)
-    g21.load_state_dict(torch.load(hyperparameters.pretrain_weights21))
+    # g21.load_state_dict(torch.load(hyperparameters.pretrain_weights21))
     g21 = DDP(g21, device_ids=[rank])
 
     g12 = UNet(n_channels=1, n_classes=2).to(rank)
-    g12.load_state_dict(torch.load(hyperparameters.pretrain_weights12))
+    # g12.load_state_dict(torch.load(hyperparameters.pretrain_weights12))
     g12 = DDP(g12, device_ids=[rank])
 
     d = UNet_sn(1, 1).to(rank)
